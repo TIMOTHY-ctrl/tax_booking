@@ -1,10 +1,25 @@
-
 "use client";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Search, LogOut, Menu, Grid } from "lucide-react";
 
 export default function Dashboard() {
   const [active, setActive] = useState("Users");
+  const router = useRouter();
+
+  // Define column headers for each table
+  const tableColumns = {
+    Vehicles: ["Vehicle ID", "Model", "Capacity", "License Plate", "Status"],
+    Routes: ["Route ID", "Origin", "Destination", "Distance", "Duration"],
+    Drivers: ["Driver ID", "First Name", "Last Name", "License No.", "Contact"],
+    Trips: ["Trip ID", "Route", "Vehicle", "Date", "Status"],
+    Payments: ["Payment ID", "Booking ID", "Amount", "Date", "Status"],
+    Users: ["User ID", "First Name", "Last Name", "Email", "Phone"],
+    Seats: ["Seat ID", "Vehicle ID", "Seat Number", "Status"],
+    "Driver-assignments": ["Assignment ID", "Driver ID", "Vehicle ID", "Date", "Status"],
+    Trip_seats: ["Trip Seat ID", "Trip ID", "Seat ID", "Status"],
+    Booking: ["Booking ID", "User ID", "Trip ID", "Seat ID", "Status"]
+  };
 
   const tables = [
     "Vehicles",
@@ -18,6 +33,19 @@ export default function Dashboard() {
     "Trip_seats",
     "Booking",
   ];
+
+  // Handle table click
+  type TableName = string;
+
+  interface TableClickHandler {
+    (table: TableName): void;
+  }
+
+  const handleTableClick: TableClickHandler = (table: TableName): void => {
+    setActive(table);
+    // Navigate to the corresponding page in /tables
+  router.push(`/tables/${table.toLowerCase().replace("_", "-")}`);
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-white border border-gray-300">
@@ -42,7 +70,7 @@ export default function Dashboard() {
         {/* Icons */}
         <div className="flex items-center space-x-3">
           <Grid className="w-5 h-5" />
-          <div className="flex items-center space-x-1">
+          <div className="flex items-center space-x-1 cursor-pointer">
             <span>Log out</span>
             <LogOut className="w-4 h-4" />
           </div>
@@ -60,7 +88,7 @@ export default function Dashboard() {
             {tables.map((t) => (
               <li
                 key={t}
-                onClick={() => setActive(t)}
+                onClick={() => handleTableClick(t)}
                 className={`px-4 py-2 cursor-pointer ${
                   active === t ? "bg-teal-200 font-semibold" : "hover:bg-gray-100"
                 }`}
@@ -77,37 +105,31 @@ export default function Dashboard() {
             <table className="min-w-full table-auto border-collapse text-sm">
               <thead className="bg-teal-700 text-white sticky top-0">
                 <tr>
-                  <th className="border px-3 py-2">Second Name</th>
-                  <th className="border px-3 py-2">First Name</th>
-                  <th className="border px-3 py-2">Email</th>
-                  <th className="border px-3 py-2">Phone</th>
-                  <th className="border px-3 py-2">Password</th>
+                  {tableColumns[active as keyof typeof tableColumns].map((column, index) => (
+                    <th key={index} className="border px-3 py-2">{column}</th>
+                  ))}
                 </tr>
               </thead>
-
               <tbody>
                 <tr>
-                  <td className="border px-3 py-2 text-red-500">new</td>
-                  <td className="border px-3 py-2"></td>
-                  <td className="border px-3 py-2"></td>
-                  <td className="border px-3 py-2"></td>
-                  <td className="border px-3 py-2"></td>
+                  {tableColumns[active as keyof typeof tableColumns].map((_, index) => (
+                    <td key={index} className="border px-3 py-2 text-red-500">
+                      {index === 0 ? "new" : ""}
+                    </td>
+                  ))}
                 </tr>
 
                 {[...Array(50)].map((_, i) => (
                   <tr key={i}>
-                    <td className="border px-3 py-2"></td>
-                    <td className="border px-3 py-2"></td>
-                    <td className="border px-3 py-2"></td>
-                    <td className="border px-3 py-2"></td>
-                    <td className="border px-3 py-2"></td>
+                    {tableColumns[active as keyof typeof tableColumns].map((_, index) => (
+                      <td key={index} className="border px-3 py-2"></td>
+                    ))}
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
         </div>
-
       </div>
     </div>
   );
